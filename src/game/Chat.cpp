@@ -527,6 +527,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_scripts",               SEC_GAMEMASTER,    true,  &ChatHandler::HandleReloadSpellScriptsCommand,            "", NULL },
         { "spell_target_position",       SEC_GAMEMASTER,    true,  &ChatHandler::HandleReloadSpellTargetPositionCommand,     "", NULL },
         { "spell_threats",               SEC_GAMEMASTER,    true,  &ChatHandler::HandleReloadSpellThreatsCommand,            "", NULL },
+        { "spell_disabled",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellDisabledCommand,           "", NULL },
 
         { NULL,                          0,                 false, NULL,                                                     "", NULL }
     };
