@@ -41,6 +41,7 @@
 #define DEFAULT_OBJECT_SCALE        1.0f                    // player/item scale as default, npc/go from database, pets from dbc
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
+#define TERRAIN_LOS_STEP_DISTANCE   3.0f
 
 uint32 GuidHigh2TypeId(uint32 guid_hi);
 
