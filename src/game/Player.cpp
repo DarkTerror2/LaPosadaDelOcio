@@ -1209,6 +1209,9 @@ void Player::Update( uint32 p_time )
         m_nextMailDelivereTime = 0;
     }
 
+    if (!isAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        SetHealth(0);
+
     //used to implement delayed far teleports
     SetCanDelayTeleport(true);
     Unit::Update( p_time );
@@ -1412,6 +1415,9 @@ void Player::Update( uint32 p_time )
         if (!m_regenTimer)
             RegenerateAll();
     }
+
+    if (!isAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        SetHealth(0);
 
     if (m_deathState == JUST_DIED)
         KillPlayer();
