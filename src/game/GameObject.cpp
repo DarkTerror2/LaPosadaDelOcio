@@ -211,6 +211,10 @@ void GameObject::Update(uint32 /*p_time*/)
                     }
                     return;
                 }
+                case GAMEOBJECT_TYPE_CHEST:
+                    if (isSpawned())
+                        m_lootState = GO_READY;
+                    break;				
                 default:
                     m_lootState = GO_READY;                         // for other GOis same switched without delay to GO_READY
                     break;
@@ -412,7 +416,7 @@ void GameObject::Update(uint32 /*p_time*/)
             }
 
             loot.clear();
-            SetLootState(GO_READY);
+            SetLootState(GO_NOT_READY);
 
             if(!m_respawnDelayTime)
                 return;
