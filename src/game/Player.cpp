@@ -6795,9 +6795,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
-    // zone changed, so area changed as well, update it
-    UpdateArea(newArea);
-
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
     switch(zone->team)
@@ -6844,6 +6841,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() != REST_TYPE_IN_TAVERN)
         // resting and not in tavern (leave city then); tavern leave handled in CheckAreaExploreAndOutdoor
         SetRestType(REST_TYPE_NO);
+
+    // zone changed, so area changed as well, update it
+    UpdateArea(newArea);
 
     // remove items with area/map limitations (delete only for alive player to allow back in ghost mode)
     // if player resurrected at teleport this will be applied in resurrect code
