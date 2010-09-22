@@ -1673,9 +1673,9 @@ bool InstanceMap::CanEnter(Player *player)
     }
 
     // cannot enter while players in the instance are in combat
-    Group *pGroup = player->GetGroup();
-    if(pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->isAlive() && player->GetMapId() != GetId())
+    if (IsRaid() && !player->isGameMaster() && GetInstanceData() && GetInstanceData()->IsEncounterInProgress())
     {
+        DETAIL_LOG("MAP: Player '%s' can not enter instance of '%s' on map '%s' while boss encounter is in progress", player->GetName(), GetInstanceId(), GetMapName());	
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
     }

@@ -24,6 +24,7 @@
 #include "Transports.h"
 #include "GridDefines.h"
 #include "MapInstanced.h"
+#include "InstanceData.h"
 #include "DestinationHolderImp.h"
 #include "World.h"
 #include "CellImpl.h"
@@ -219,13 +220,16 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
             }
         }
 
-        // TODO: move this to a map dependent location
-        /*if(i_data && i_data->IsEncounterInProgress())
+        //The player tries to enter a Instance where a Boss Encouter is in Progress
+        InstanceData* i_data = ((InstanceMap*)CreateMap(mapid, player))->GetInstanceData();
+        if (entry->map_type == MAP_RAID && !player->isGameMaster() && i_data && i_data->IsEncounterInProgress())
         {
-            DEBUG_LOG("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
-            player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-            return(false);
-        }*/
+        	player->SendTransferAborted(mapid, TRANSFER_ABORT_ZONE_IN_COMBAT);
+            player->GetSession()->SendAreaTriggerMessage("You can not enter Instance %s while Boss Encounter is in Progress", mapName);
+            DEBUG_LOG("MAP: Player '%s' can not enter instance of '%s' while boss encounter is in progress",player->GetName(), mapName);
+            return false;
+        }
+
         return true;
     }
     else
