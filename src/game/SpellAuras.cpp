@@ -3726,17 +3726,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
         pet->AttackStop();
-
-        // out of range pet dismissed
-        if (!pet->IsWithinDistInMap(p_caster, pet->GetMap()->GetVisibilityDistance()))
-        {
-            pet->Remove(PET_SAVE_NOT_IN_SLOT, true);
-        }
-        else
-        {
-            pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            pet->AddSplineFlag(SPLINEFLAG_WALKMODE);
-        }
+        pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_DEFAULT_FOLLOW_ANGLE);
     }
 }
 
