@@ -1561,6 +1561,7 @@ Arena.ArenaSeason.ID = 1
 Arena.ArenaSeason.InProgress = 1
 Arena.StartRating = -1
 Arena.StartPersonalRating = -1
+Arena.TimeForceClose = 2820000
 
 ###################################################################################################################
 # NETWORK CONFIG

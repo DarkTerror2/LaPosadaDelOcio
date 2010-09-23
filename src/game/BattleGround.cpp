@@ -510,7 +510,8 @@ void BattleGround::Update(uint32 diff)
     // Arena time limit
     if(isArena() && !m_ArenaEnded)
     {
-        if(m_StartTime > uint32(ARENA_TIME_LIMIT))
+        uint32 arena_time_limit = sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_WIN_ARENA_POINTS);
+        if(m_StartTime > uint32(arena_time_limit/*ARENA_TIME_LIMIT*/))
         {
             uint32 winner;
             // winner is team with higher damage
@@ -768,33 +769,86 @@ void BattleGround::EndBattleGround(uint32 winner)
         loser_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(winner)));
         if (winner_arena_team && loser_arena_team)
         {
+            uint32 temporada = sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_ID);
             loser_rating = loser_arena_team->GetStats().rating;
             winner_rating = winner_arena_team->GetStats().rating;
             int32 winner_change = winner_arena_team->WonAgainst(loser_rating);
             int32 loser_change = loser_arena_team->LostAgainst(winner_rating);
             DEBUG_LOG("--- Winner rating: %u, Loser rating: %u, Winner change: %i, Loser change: %i ---", winner_rating, loser_rating, winner_change, loser_change);
-            CharacterDatabase.PExecute("INSERT INTO `arena_logs_reducido` (`team1`,`team1_rating`,`team2`,`team2_rating`,`winner`,`winner_uprate`,`winner_downrate`,`timestamp`) VALUES ('%u','%u','%u','%u','%u','%u','%u',NULL)",winner_arena_team->GetId(),winner_rating,loser_arena_team->GetId(),loser_rating,winner_arena_team->GetId(),winner_change,loser_change);
+            CharacterDatabase.PExecute("INSERT INTO `arena_logs_reducido` (`team1`,`team1_rating`,`team2`,`team2_rating`,`winner`,`winner_uprate`,`winner_downrate`,`timestamp`) VALUES ('%u','%u','%u','%u','%u','%i','%i',NULL)",winner_arena_team->GetId(),winner_rating,loser_arena_team->GetId(),loser_rating,winner_arena_team->GetId(),winner_change,loser_change);
 
-            std::string winner_ids = "";
-            std::string loser_ids = "";
+            std::string winner_id[10];
+            std::string loser_id[10];
+            uint32 kill_winer[10];
+            uint32 kill_loser[10];		
+            uint32 death_winer[10];
+            uint32 death_loser[10];				
+            uint32 damage_winer[10];
+            uint32 damage_loser[10];
+            uint32 healing_winer[10];
+            uint32 healing_loser[10];
+
             for(BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             {
+                winner_id[itr->first] = "";
+                loser_id[itr->first] = "";
+                kill_winer[itr->first] = 0;
+                kill_loser[itr->first] = 0;
+                death_winer[itr->first] = 0;
+                death_loser[itr->first] = 0;
+                damage_winer[itr->first] = 0;
+                damage_loser[itr->first] = 0;
+                healing_winer[itr->first] = 0;
+                healing_loser[itr->first] = 0;
+			
                 Player *plr = sObjectMgr.GetPlayer(itr->first);
                 if (plr == NULL)
                     continue;
 
-                char _buf[32];
-                sprintf(_buf, ":%d", plr->GetGUIDLow());
-
                 if (itr->second.Team == winner)
-                    winner_ids += _buf;
+                {
+                    winner_id[itr->first] = plr->GetGUIDLow();
+                    kill_winer[itr->first] = GetPlayerScore(plr, SCORE_KILLING_BLOWS);
+                    death_winer[itr->first] = GetPlayerScore(plr, SCORE_DEATHS);
+                    damage_winer[itr->first] = GetPlayerScore(plr, SCORE_DAMAGE_DONE);
+                    healing_winer[itr->first] = GetPlayerScore(plr, SCORE_HEALING_DONE);
+				}
                 else
-                    loser_ids += _buf;
+                {
+                    loser_id[itr->first] = plr->GetGUIDLow();
+                    kill_loser[itr->first] = GetPlayerScore(plr, SCORE_KILLING_BLOWS);
+                    death_loser[itr->first] = GetPlayerScore(plr, SCORE_DEATHS);
+                    damage_loser[itr->first] = GetPlayerScore(plr, SCORE_DAMAGE_DONE);
+                    healing_loser[itr->first] = GetPlayerScore(plr, SCORE_HEALING_DONE);
+				}
             }
 
-            CharacterDatabase.PExecute("INSERT INTO `arena_logs` (`team1`,`team1_members`,`team1_rating_change`,`team2`,`team2_members`,`team2_rating_change`,`winner`,`timestamp`) VALUES ('%u','%s','%u','%u','%s','%u','%u',NULL)",
-                                        winner_arena_team->GetId(), winner_ids.c_str(), winner_change,
-                                        loser_arena_team->GetId(), loser_ids.c_str(), loser_change,
+			CharacterDatabase.PExecute("INSERT INTO `arena_logs` (`temporada`, `team1`, `team1_member1`, `team1_member1_kills`, `team1_member1_deaths`, `team1_member1_damage`, `team1_member1_healing`, `team1_member2`, `team1_member2_kills`, `team1_member2_deaths`, `team1_member2_damage`, `team1_member2_healing`, `team1_member3`, `team1_member3_kills`, `team1_member3_deaths`, `team1_member3_damage`, `team1_member3_healing`, `team1_member4`, `team1_member4_kills`, `team1_member4_deaths`, `team1_member4_damage`, `team1_member4_healing`, `team1_member5`, `team1_member5_kills`, `team1_member5_deaths`, `team1_member5_damage`, `team1_member5_healing`, `team1_member6`, `team1_member6_kills`, `team1_member6_deaths`, `team1_member6_damage`, `team1_member6_healing`, `team1_member7`, `team1_member7_kills`, `team1_member7_deaths`, `team1_member7_damage`, `team1_member7_healing`, `team1_member8`, `team1_member8_kills`, `team1_member8_deaths`, `team1_member8_damage`, `team1_member8_healing`, `team1_member9`, `team1_member9_kills`, `team1_member9_deaths`, `team1_member9_damage`, `team1_member9_healing`, `team1_member10`, `team1_member10_kills`, `team1_member10_deaths`, `team1_member10_damage`, `team1_member10_healing`, `team1_rating_change`, `team2`, `team2_member1`, `team2_member1_kills`, `team2_member1_deaths`, `team2_member1_damage`, `team2_member1_healing`, `team2_member2`, `team2_member2_kills`, `team2_member2_deaths`, `team2_member2_damage`, `team2_member2_healing`, `team2_member3`, `team2_member3_kills`, `team2_member3_deaths`, `team2_member3_damage`, `team2_member3_healing`, `team2_member4`, `team2_member4_kills`, `team2_member4_deaths`, `team2_member4_damage`, `team2_member4_healing`, `team2_member5`, `team2_member5_kills`, `team2_member5_deaths`, `team2_member5_damage`, `team2_member5_healing`, `team2_member6`, `team2_member6_kills`, `team2_member6_deaths`, `team2_member6_damage`, `team2_member6_healing`, `team2_member7`, `team2_member7_kills`, `team2_member7_deaths`, `team2_member7_damage`, `team2_member7_healing`, `team2_member8`, `team2_member8_kills`, `team2_member8_deaths`, `team2_member8_damage`, `team2_member8_healing`, `team2_member9`, `team2_member9_kills`, `team2_member9_deaths`, `team2_member9_damage`, `team2_member9_healing`, `team2_member10`, `team2_member10_kills`, `team2_member10_deaths`, `team2_member10_damage`, `team2_member10_healing`, `team2_rating_change`, `winner`, `timestamp`) VALUES ('%u','%u','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%i','%u','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%i','%u',NULL)",
+                                        temporada,
+                                        winner_arena_team->GetId(),
+                                        winner_id[1], kill_winer[1], death_winer[1], damage_winer[1], healing_winer[1],
+                                        winner_id[2], kill_winer[2], death_winer[2], damage_winer[2], healing_winer[2],
+                                        winner_id[3], kill_winer[3], death_winer[3], damage_winer[3], healing_winer[3],
+                                        winner_id[4], kill_winer[4], death_winer[4], damage_winer[4], healing_winer[4],
+                                        winner_id[5], kill_winer[5], death_winer[5], damage_winer[5], healing_winer[5],
+                                        winner_id[6], kill_winer[6], death_winer[6], damage_winer[6], healing_winer[6],
+                                        winner_id[7], kill_winer[7], death_winer[7], damage_winer[7], healing_winer[7],
+                                        winner_id[8], kill_winer[8], death_winer[8], damage_winer[8], healing_winer[8],
+                                        winner_id[9], kill_winer[9], death_winer[9], damage_winer[9], healing_winer[9],
+                                        winner_id[10], kill_winer[10], death_winer[10], damage_winer[10], healing_winer[10],
+                                        winner_change,
+                                        loser_arena_team->GetId(),
+                                        loser_id[1], kill_loser[1], death_loser[1], damage_loser[1], healing_loser[1],
+                                        loser_id[2], kill_loser[2], death_loser[2], damage_loser[2], healing_loser[2],
+                                        loser_id[3], kill_loser[3], death_loser[3], damage_loser[3], healing_loser[3],
+                                        loser_id[4], kill_loser[4], death_loser[4], damage_loser[4], healing_loser[4],
+                                        loser_id[5], kill_loser[5], death_loser[5], damage_loser[5], healing_loser[5],
+                                        loser_id[6], kill_loser[6], death_loser[6], damage_loser[6], healing_loser[6],
+                                        loser_id[7], kill_loser[7], death_loser[7], damage_loser[7], healing_loser[7],
+                                        loser_id[8], kill_loser[8], death_loser[8], damage_loser[8], healing_loser[8],
+                                        loser_id[9], kill_loser[9], death_loser[9], damage_loser[9], healing_loser[9],
+                                        loser_id[10], kill_loser[10], death_loser[10], damage_loser[10], healing_loser[10],
+                                        loser_change,
                                         winner_arena_team->GetId());
 
             SetArenaTeamRatingChangeForTeam(winner, winner_change);
